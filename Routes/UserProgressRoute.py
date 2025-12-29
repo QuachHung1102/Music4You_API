@@ -36,7 +36,7 @@ class UserProgress(UserProgressBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("/user-progress", response_model=List[UserProgress])
@@ -111,7 +111,7 @@ async def get_user_progress(progress_id: int, db: AsyncSession = Depends(get_db)
 async def create_user_progress(
     progress: UserProgressCreate, db: AsyncSession = Depends(get_db)
 ):
-    db_progress = UserProgressModel(**progress.dict())
+    db_progress = UserProgressModel(**progress.model_dump())
     db.add(db_progress)
     await db.commit()
     await db.refresh(db_progress)
@@ -128,7 +128,7 @@ async def update_user_progress(
     db_progress = result.scalar_one_or_none()
     if db_progress is None:
         raise HTTPException(status_code=404, detail="User progress not found")
-    for key, value in progress.dict().items():
+    for key, value in progress.model_dump().items():
         setattr(db_progress, key, value)
     await db.commit()
     await db.refresh(db_progress)

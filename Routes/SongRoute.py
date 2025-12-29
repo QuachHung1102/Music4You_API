@@ -37,7 +37,7 @@ class Song(SongBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("/songs", response_model=List[Song])
@@ -58,7 +58,7 @@ async def get_song(song_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.post("/songs", response_model=Song, status_code=status.HTTP_201_CREATED)
 async def create_song(song: SongCreate, db: AsyncSession = Depends(get_db)):
-    db_song = SongModel(**song.dict())
+    db_song = SongModel(**song.model_dump())
     db.add(db_song)
     await db.commit()
     await db.refresh(db_song)
@@ -73,7 +73,7 @@ async def update_song(
     db_song = result.scalar_one_or_none()
     if db_song is None:
         raise HTTPException(status_code=404, detail="Song not found")
-    for key, value in song.dict().items():
+    for key, value in song.model_dump().items():
         setattr(db_song, key, value)
     await db.commit()
     await db.refresh(db_song)

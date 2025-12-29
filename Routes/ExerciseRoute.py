@@ -35,7 +35,7 @@ class Exercise(ExerciseBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Get all exercises by lesson_id
@@ -68,7 +68,7 @@ async def get_exercise(exercise_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.post("/exercises", response_model=Exercise, status_code=status.HTTP_201_CREATED)
 async def create_exercise(exercise: ExerciseCreate, db: AsyncSession = Depends(get_db)):
-    db_exercise = ExerciseModel(**exercise.dict())
+    db_exercise = ExerciseModel(**exercise.model_dump())
     db.add(db_exercise)
     await db.commit()
     await db.refresh(db_exercise)
@@ -85,7 +85,7 @@ async def update_exercise(
     db_exercise = result.scalar_one_or_none()
     if db_exercise is None:
         raise HTTPException(status_code=404, detail="Exercise not found")
-    for key, value in exercise.dict().items():
+    for key, value in exercise.model_dump().items():
         setattr(db_exercise, key, value)
     await db.commit()
     await db.refresh(db_exercise)

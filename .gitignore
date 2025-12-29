@@ -276,3 +276,22 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/linux,macos,python,pycharm,windows,visualstudiocode
+
+### Custom Project Specific ###
+# SQLite database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.idea/

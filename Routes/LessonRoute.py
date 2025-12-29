@@ -39,7 +39,7 @@ class Lesson(LessonBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("/lessons", response_model=List[Lesson])
@@ -60,7 +60,7 @@ async def get_lesson(lesson_id: int, db: AsyncSession = Depends(get_db)):
 
 @router.post("/lessons", response_model=Lesson, status_code=status.HTTP_201_CREATED)
 async def create_lesson(lesson: LessonCreate, db: AsyncSession = Depends(get_db)):
-    db_lesson = LessonModel(**lesson.dict())
+    db_lesson = LessonModel(**lesson.model_dump())
     db.add(db_lesson)
     await db.commit()
     await db.refresh(db_lesson)
@@ -75,7 +75,7 @@ async def update_lesson(
     db_lesson = result.scalar_one_or_none()
     if db_lesson is None:
         raise HTTPException(status_code=404, detail="Lesson not found")
-    for key, value in lesson.dict().items():
+    for key, value in lesson.model_dump().items():
         setattr(db_lesson, key, value)
     await db.commit()
     await db.refresh(db_lesson)

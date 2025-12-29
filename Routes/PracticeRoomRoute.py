@@ -36,7 +36,7 @@ class PracticeRoom(PracticeRoomBase):
     created_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("/practice-rooms", response_model=List[PracticeRoom])
@@ -87,7 +87,7 @@ async def get_practice_rooms_by_instrument(
 async def create_practice_room(
     room: PracticeRoomCreate, db: AsyncSession = Depends(get_db)
 ):
-    db_room = PracticeRoomModel(**room.dict())
+    db_room = PracticeRoomModel(**room.model_dump())
     db.add(db_room)
     await db.commit()
     await db.refresh(db_room)
@@ -104,7 +104,7 @@ async def update_practice_room(
     db_room = result.scalar_one_or_none()
     if db_room is None:
         raise HTTPException(status_code=404, detail="Practice room not found")
-    for key, value in room.dict().items():
+    for key, value in room.model_dump().items():
         setattr(db_room, key, value)
     await db.commit()
     await db.refresh(db_room)

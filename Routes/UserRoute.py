@@ -36,7 +36,7 @@ class User(UserBase):
     created_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 @router.get("/users", response_model=List[User])
@@ -76,7 +76,7 @@ async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("/users", response_model=User, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    db_user = UserModel(**user.dict())
+    db_user = UserModel(**user.model_dump())
     db.add(db_user)
     try:
         await db.commit()
@@ -95,7 +95,7 @@ async def update_user(
     db_user = result.scalar_one_or_none()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    for key, value in user.dict().items():
+    for key, value in user.model_dump().items():
         setattr(db_user, key, value)
     await db.commit()
     await db.refresh(db_user)
